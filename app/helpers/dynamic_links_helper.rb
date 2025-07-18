@@ -1,0 +1,2 @@
+module DynamicLinksHelper
+end

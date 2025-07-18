@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  dynamic_link: one
+  app_store_id: MyString
+  bundle_identifier: MyString
+  custom_scheme: MyString
+  app_store_url: MyString
+  fallback_url: MyString
+
+two:
+  dynamic_link: two
+  app_store_id: MyString
+  bundle_identifier: MyString
+  custom_scheme: MyString
+  app_store_url: MyString
+  fallback_url: MyString

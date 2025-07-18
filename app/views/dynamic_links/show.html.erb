@@ -1,0 +1,282 @@
+<% content_for :title, @dynamic_link.title %>
+
+<div class="max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="flex items-center space-x-3 mb-2">
+          <h1 class="text-3xl font-bold text-gray-900"><%= @dynamic_link.title %></h1>
+          <% if @dynamic_link.active? %>
+            <span class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
+              ● Active
+            </span>
+          <% else %>
+            <span class="bg-gray-100 text-gray-800 text-sm font-medium px-3 py-1 rounded-full">
+              ● Inactive
+            </span>
+          <% end %>
+        </div>
+        <p class="text-gray-600"><%= @dynamic_link.description if @dynamic_link.description.present? %></p>
+        
+        <!-- Short URL -->
+        <div class="flex items-center space-x-3 mt-4">
+          <div class="flex items-center space-x-2 bg-blue-50 rounded-lg px-4 py-3 border border-blue-200">
+            <code class="text-lg font-mono text-blue-800"><%= @dynamic_link.short_url %></code>
+            <button onclick="copyToClipboard('<%= @dynamic_link.short_url %>', this)" 
+                    class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              📋 Copy
+            </button>
+          </div>
+          <%= link_to @dynamic_link.short_url, target: "_blank", class: "text-blue-600 hover:text-blue-800 text-sm font-medium" do %>
+            🔗 Test Link
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="flex space-x-3">
+        <%= link_to edit_dynamic_link_path(@dynamic_link), class: "bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700" do %>
+          ✏️ Edit
+        <% end %>
+        <%= link_to analytics_dynamic_link_path(@dynamic_link), class: "bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700" do %>
+          📊 Analytics
+        <% end %>
+        <%= link_to root_path, class: "bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200" do %>
+          ← Dashboard
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auto-Parameters Preview -->
+  <% if @dynamic_link.enable_utm_tracking || @dynamic_link.enable_device_params || @dynamic_link.auto_params.present? %>
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md p-6 mb-8">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">🎯 Auto-Parameters Preview</h2>
+      <p class="text-sm text-gray-600 mb-4">Here's how your URLs will look with auto-generated parameters:</p>
+      
+      <div class="space-y-4">
+        <% if @dynamic_link.enable_utm_tracking %>
+          <div>
+            <h4 class="font-medium text-gray-800 mb-2">🔗 iOS App (with UTM tracking):</h4>
+            <code class="block text-sm bg-white p-3 rounded border text-gray-700 break-all">
+              <%= @dynamic_link.target_url_with_params(device_type: 'smartphone', source: 'ios_app') %>
+            </code>
+          </div>
+        <% end %>
+        
+        <% if @dynamic_link.enable_device_params %>
+          <div>
+            <h4 class="font-medium text-gray-800 mb-2">🤖 Android App (with device params):</h4>
+            <code class="block text-sm bg-white p-3 rounded border text-gray-700 break-all">
+              <%= @dynamic_link.target_url_with_params(device_type: 'tablet', source: 'android_app') %>
+            </code>
+          </div>
+        <% end %>
+        
+        <% if @dynamic_link.auto_params.present? && @dynamic_link.auto_params.any? %>
+          <div>
+            <h4 class="font-medium text-gray-800 mb-2">💻 Web (with custom params):</h4>
+            <code class="block text-sm bg-white p-3 rounded border text-gray-700 break-all">
+              <%= @dynamic_link.target_url_with_params(device_type: 'desktop', source: 'web') %>
+            </code>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Stats Overview -->
+    <div class="lg:col-span-2">
+      <!-- Quick Stats -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">📊 Performance Overview</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600"><%= number_with_delimiter(@dynamic_link.total_clicks) %></div>
+            <div class="text-sm text-gray-500">Total Clicks</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600"><%= @dynamic_link.recent_clicks(7).count %></div>
+            <div class="text-sm text-gray-500">Last 7 Days</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-purple-600"><%= @dynamic_link.recent_clicks(1).count %></div>
+            <div class="text-sm text-gray-500">Today</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-orange-600"><%= time_ago_in_words(@dynamic_link.created_at) %></div>
+            <div class="text-sm text-gray-500">Age</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Platform Breakdown -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">📱 Platform Breakdown</h2>
+        <% if @clicks_by_platform.any? %>
+          <div class="space-y-3">
+            <% @clicks_by_platform.each do |platform, count| %>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-3 h-3 rounded-full <%= platform == 'smartphone' ? 'bg-blue-500' : platform == 'tablet' ? 'bg-green-500' : 'bg-purple-500' %>"></div>
+                  <span class="font-medium text-gray-700">
+                    <%= platform.titleize %>
+                    <% if platform == 'smartphone' %>📱<% elsif platform == 'tablet' %>📋<% else %>💻<% end %>
+                  </span>
+                </div>
+                <div class="flex items-center space-x-3">
+                  <span class="text-gray-900 font-semibold"><%= number_with_delimiter(count) %></span>
+                  <div class="w-20 bg-gray-200 rounded-full h-2">
+                    <div class="<%= platform == 'smartphone' ? 'bg-blue-500' : platform == 'tablet' ? 'bg-green-500' : 'bg-purple-500' %> h-2 rounded-full" 
+                         style="width: <%= (count.to_f / @dynamic_link.total_clicks * 100).round(1) %>%"></div>
+                  </div>
+                  <span class="text-sm text-gray-500"><%= (count.to_f / @dynamic_link.total_clicks * 100).round(1) %>%</span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-gray-500 text-center py-4">No clicks yet - share your link to see platform data!</p>
+        <% end %>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">🕐 Recent Activity</h2>
+        <% if @recent_clicks.any? %>
+          <div class="space-y-3">
+            <% @recent_clicks.each do |click| %>
+              <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                <div class="flex items-center space-x-3">
+                  <div class="text-sm">
+                    <span class="font-medium text-gray-900">
+                      <%= click.device_type.titleize %>
+                      <% if click.os_name %>(<%= click.os_name %>)<% end %>
+                    </span>
+                    <% if click.country %>
+                      <span class="text-gray-500">from <%= click.country %></span>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="text-sm text-gray-500">
+                  <%= time_ago_in_words(click.clicked_at) %> ago
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-gray-500 text-center py-4">No clicks yet - your link activity will appear here!</p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Configuration Panel -->
+    <div class="space-y-6">
+      <!-- Target URL -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="font-semibold text-gray-900 mb-3">🎯 Target URL</h3>
+        <div class="bg-gray-50 rounded-lg p-3">
+          <code class="text-sm text-gray-700 break-all"><%= @dynamic_link.target_url %></code>
+        </div>
+      </div>
+
+      <!-- Platform Configurations -->
+      <% if @dynamic_link.ios_config.present? %>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="font-semibold text-blue-900 mb-3">📱 iOS Configuration</h3>
+          <div class="space-y-2 text-sm">
+            <div><strong>App Store ID:</strong> <%= @dynamic_link.ios_config.app_store_id %></div>
+            <div><strong>Bundle ID:</strong> <%= @dynamic_link.ios_config.bundle_identifier %></div>
+            <div><strong>Custom Scheme:</strong> <%= @dynamic_link.ios_config.custom_scheme %></div>
+                            <div><strong>Custom Scheme:</strong> <%= @dynamic_link.ios_config.custom_scheme_url %></div>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @dynamic_link.android_config.present? %>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="font-semibold text-green-900 mb-3">🤖 Android Configuration</h3>
+          <div class="space-y-2 text-sm">
+            <div><strong>Package Name:</strong> <%= @dynamic_link.android_config.package_name %></div>
+            <div><strong>Custom Scheme:</strong> <%= @dynamic_link.android_config.custom_scheme %></div>
+            <div><strong>Play Store URL:</strong> <%= @dynamic_link.android_config.play_store_url %></div>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @dynamic_link.web_config.present? %>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="font-semibold text-purple-900 mb-3">💻 Web Configuration</h3>
+          <div class="space-y-2 text-sm">
+            <% if @dynamic_link.web_config.desktop_url.present? %>
+              <div><strong>Desktop URL:</strong> <%= @dynamic_link.web_config.desktop_url %></div>
+            <% end %>
+            <% if @dynamic_link.web_config.fallback_url.present? %>
+              <div><strong>Fallback URL:</strong> <%= @dynamic_link.web_config.fallback_url %></div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Settings -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="font-semibold text-gray-900 mb-3">⚙️ Settings</h3>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-700">Status</span>
+            <span class="<%= @dynamic_link.active? ? 'text-green-600' : 'text-gray-500' %> text-sm font-medium">
+              <%= @dynamic_link.active? ? '🟢 Active' : '⚪ Inactive' %>
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-700">Analytics</span>
+            <span class="<%= @dynamic_link.analytics_enabled? ? 'text-green-600' : 'text-gray-500' %> text-sm font-medium">
+              <%= @dynamic_link.analytics_enabled? ? '📊 Enabled' : '📊 Disabled' %>
+            </span>
+          </div>
+          <% if @dynamic_link.created_by.present? %>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-700">Created By</span>
+              <span class="text-sm text-gray-900"><%= @dynamic_link.created_by %></span>
+            </div>
+          <% end %>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-700">Created</span>
+            <span class="text-sm text-gray-900"><%= @dynamic_link.created_at.strftime("%B %d, %Y") %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="font-semibold text-gray-900 mb-3">🔧 Quick Actions</h3>
+        <div class="space-y-2">
+          <%= link_to toggle_active_dynamic_link_path(@dynamic_link), method: :patch, 
+                      class: "block w-full text-center px-4 py-2 #{ @dynamic_link.active? ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-green-100 text-green-700 hover:bg-green-200' } rounded-lg font-medium" do %>
+            <%= @dynamic_link.active? ? '⏸️ Deactivate' : '▶️ Activate' %>
+          <% end %>
+          
+          <%= link_to "🗑️ Delete", dynamic_link_path(@dynamic_link), method: :delete,
+                      confirm: "Are you sure? This action cannot be undone.",
+                      class: "block w-full text-center px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg font-medium" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyToClipboard(text, button) {
+  navigator.clipboard.writeText(text).then(function() {
+    const originalText = button.textContent;
+    button.textContent = '✅ Copied!';
+    button.classList.add('text-green-600');
+    
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.classList.remove('text-green-600');
+    }, 2000);
+  });
+}
+</script>

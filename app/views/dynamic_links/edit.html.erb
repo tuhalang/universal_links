@@ -1,0 +1,333 @@
+<% content_for :title, "Edit #{@dynamic_link.title}" %>
+
+<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <!-- Header with Actions -->
+  <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">✏️ Edit Dynamic Link</h1>
+        <p class="text-gray-600 mt-1">Update your smart link configuration</p>
+      </div>
+      <div class="flex space-x-3">
+        <%= link_to @dynamic_link, class: "text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center" do %>
+          👁️ Preview
+        <% end %>
+        <%= link_to analytics_dynamic_link_path(@dynamic_link), class: "text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center" do %>
+          📊 Analytics
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <%= form_with model: @dynamic_link, local: true, class: "space-y-6" do |form| %>
+    <!-- Basic Information - Always Visible -->
+    <div class="bg-white rounded-lg shadow-sm border">
+      <div class="p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">📝 Basic Information</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <%= form.label :title, "Title", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.text_field :title, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+          </div>
+          
+          <div>
+            <%= form.label :short_code, "Short Code", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.text_field :short_code, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <%= form.label :target_url, "Target URL", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.url_field :target_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+
+        <div class="mt-4">
+          <%= form.label :description, "Description (optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_area :description, rows: 2, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Collapsible Sections -->
+    <div class="space-y-4">
+      <!-- iOS Configuration -->
+      <div class="bg-white rounded-lg shadow-sm border">
+        <button type="button" onclick="toggleSection('ios-section')" class="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+          <div class="flex items-center space-x-3">
+            <span class="text-lg">🍎</span>
+            <div>
+              <h3 class="font-medium text-gray-900">iOS Configuration</h3>
+              <p class="text-sm text-gray-500">App Store and custom scheme settings</p>
+            </div>
+          </div>
+          <svg id="ios-chevron" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        
+        <div id="ios-section" class="hidden border-t border-gray-200">
+          <%= form.fields_for :ios_config_attributes, @dynamic_link.ios_config || @dynamic_link.build_ios_config do |ios_form| %>
+            <div class="p-6 space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <%= ios_form.label :app_store_id, "App Store ID", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                  <%= ios_form.text_field :app_store_id, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "123456789" %>
+                </div>
+                <div>
+                  <%= ios_form.label :bundle_identifier, "Bundle ID", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                  <%= ios_form.text_field :bundle_identifier, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "com.company.app" %>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <%= ios_form.label :custom_scheme, "Custom URL Scheme", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                  <%= ios_form.text_field :custom_scheme, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "myapp" %>
+                </div>
+                <div>
+                  <%= ios_form.label :app_store_url, "Custom App Store URL", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                  <%= ios_form.url_field :app_store_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "https://apps.apple.com/..." %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Android Configuration -->
+      <div class="bg-white rounded-lg shadow-sm border">
+        <button type="button" onclick="toggleSection('android-section')" class="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+          <div class="flex items-center space-x-3">
+            <span class="text-lg">🤖</span>
+            <div>
+              <h3 class="font-medium text-gray-900">Android Configuration</h3>
+              <p class="text-sm text-gray-500">Play Store and custom scheme settings</p>
+            </div>
+          </div>
+          <svg id="android-chevron" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        
+        <div id="android-section" class="hidden border-t border-gray-200">
+          <%= form.fields_for :android_config_attributes, @dynamic_link.android_config || @dynamic_link.build_android_config do |android_form| %>
+            <div class="p-6 space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <%= android_form.label :package_name, "Package Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                  <%= android_form.text_field :package_name, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm", placeholder: "com.company.app" %>
+                </div>
+                <div>
+                  <%= android_form.label :custom_scheme, "Custom URL Scheme", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                  <%= android_form.text_field :custom_scheme, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm", placeholder: "myapp" %>
+                </div>
+              </div>
+              
+              <div>
+                <%= android_form.label :play_store_url, "Play Store URL", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= android_form.url_field :play_store_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm", placeholder: "https://play.google.com/..." %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Web Configuration -->
+      <div class="bg-white rounded-lg shadow-sm border">
+        <button type="button" onclick="toggleSection('web-section')" class="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+          <div class="flex items-center space-x-3">
+            <span class="text-lg">💻</span>
+            <div>
+              <h3 class="font-medium text-gray-900">Web Configuration</h3>
+              <p class="text-sm text-gray-500">Desktop and fallback URL settings</p>
+            </div>
+          </div>
+          <svg id="web-chevron" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        
+        <div id="web-section" class="hidden border-t border-gray-200">
+          <%= form.fields_for :web_config_attributes, @dynamic_link.web_config || @dynamic_link.build_web_config do |web_form| %>
+            <div class="p-6 space-y-4">
+              <div>
+                <%= web_form.label :desktop_url, "Desktop URL", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= web_form.url_field :desktop_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm", placeholder: "https://myapp.com/desktop" %>
+              </div>
+              <div>
+                <%= web_form.label :fallback_url, "Fallback URL", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= web_form.url_field :fallback_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm", placeholder: "https://myapp.com" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Social Media & SEO -->
+      <div class="bg-white rounded-lg shadow-sm border">
+        <button type="button" onclick="toggleSection('social-section')" class="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+          <div class="flex items-center space-x-3">
+            <span class="text-lg">📱</span>
+            <div>
+              <h3 class="font-medium text-gray-900">Social Media & SEO</h3>
+              <p class="text-sm text-gray-500">Open Graph and social sharing settings</p>
+            </div>
+          </div>
+          <svg id="social-chevron" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        
+        <div id="social-section" class="hidden border-t border-gray-200">
+          <div class="p-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <%= form.label :social_title, "Social Title", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.text_field :social_title, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "Title for social shares" %>
+                <p class="text-xs text-gray-500 mt-1">Max 60 characters</p>
+              </div>
+              <div>
+                <%= form.label :social_image_url, "Social Image URL", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.url_field :social_image_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "https://..." %>
+              </div>
+            </div>
+            
+            <div>
+              <%= form.label :social_description, "Social Description", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_area :social_description, rows: 2, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "Description for social shares" %>
+              <p class="text-xs text-gray-500 mt-1">Max 160 characters</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auto-Parameters -->
+      <div class="bg-white rounded-lg shadow-sm border">
+        <button type="button" onclick="toggleSection('params-section')" class="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+          <div class="flex items-center space-x-3">
+            <span class="text-lg">🎯</span>
+            <div>
+              <h3 class="font-medium text-gray-900">Auto-Parameters</h3>
+              <p class="text-sm text-gray-500">Automatic tracking parameter generation</p>
+            </div>
+          </div>
+          <svg id="params-chevron" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        
+        <div id="params-section" class="hidden border-t border-gray-200">
+          <div class="p-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex items-center space-x-3">
+                <%= form.check_box :enable_utm_tracking, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+                <%= form.label :enable_utm_tracking, class: "text-sm font-medium text-gray-700" do %>
+                  Enable UTM Tracking
+                  <span class="block text-xs text-gray-500">utm_source, utm_medium, utm_campaign, utm_content</span>
+                <% end %>
+              </div>
+              
+              <div class="flex items-center space-x-3">
+                <%= form.check_box :enable_device_params, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+                <%= form.label :enable_device_params, class: "text-sm font-medium text-gray-700" do %>
+                  Enable Device Parameters
+                  <span class="block text-xs text-gray-500">dl_device, dl_timestamp, dl_id</span>
+                <% end %>
+              </div>
+            </div>
+            
+            <div>
+              <%= form.label :auto_params, "Custom Parameters (JSON)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_area :auto_params, rows: 3, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono", 
+                               placeholder: '{"campaign_id": "summer2024", "source": "newsletter"}',
+                               value: (@dynamic_link.auto_params&.to_json || '{}') %>
+              <p class="text-xs text-gray-500 mt-1">Additional parameters to append automatically</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings & Actions -->
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">⚙️ Settings</h3>
+      
+      <div class="flex flex-wrap items-center gap-6 mb-6">
+        <div class="flex items-center space-x-3">
+          <%= form.check_box :active, class: "h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" %>
+          <%= form.label :active, "Active", class: "text-sm font-medium text-gray-700" %>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+          <%= form.check_box :analytics_enabled, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+          <%= form.label :analytics_enabled, "Enable Analytics", class: "text-sm font-medium text-gray-700" %>
+        </div>
+        
+        <div class="flex-1">
+          <%= form.label :created_by, "Created By", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= form.text_field :created_by, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "Your name or team" %>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+        <div class="flex space-x-3">
+          <%= form.submit "💾 Update Dynamic Link", class: "bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition-colors" %>
+          <%= link_to "Cancel", @dynamic_link, class: "bg-gray-100 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors" %>
+        </div>
+        
+        <div class="text-sm text-gray-500 flex items-center">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          Changes take effect immediately
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<!-- JavaScript for Collapsible Sections -->
+<script>
+function toggleSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  const chevron = document.getElementById(sectionId.replace('-section', '-chevron'));
+  
+  if (section.classList.contains('hidden')) {
+    section.classList.remove('hidden');
+    chevron.style.transform = 'rotate(180deg)';
+  } else {
+    section.classList.add('hidden');
+    chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+// Auto-expand sections that have content/errors
+document.addEventListener('DOMContentLoaded', function() {
+  // Check for iOS config
+  <% if @dynamic_link.ios_config&.app_store_id.present? %>
+    toggleSection('ios-section');
+  <% end %>
+  
+  // Check for Android config
+  <% if @dynamic_link.android_config&.package_name.present? %>
+    toggleSection('android-section');
+  <% end %>
+  
+  // Check for Web config
+  <% if @dynamic_link.web_config&.desktop_url.present? %>
+    toggleSection('web-section');
+  <% end %>
+  
+  // Check for Social config
+  <% if @dynamic_link.social_title.present? || @dynamic_link.social_description.present? %>
+    toggleSection('social-section');
+  <% end %>
+  
+  // Check for Auto-params config
+  <% if @dynamic_link.enable_utm_tracking == false || @dynamic_link.enable_device_params == false || @dynamic_link.auto_params&.any? %>
+    toggleSection('params-section');
+  <% end %>
+});
+</script>

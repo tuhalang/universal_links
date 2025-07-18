@@ -1,0 +1,274 @@
+<% content_for :title, "Create New Link" %>
+
+<div class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Create New Dynamic Link</h1>
+        <p class="mt-2 text-gray-600">Build a smart link that adapts to any platform</p>
+      </div>
+      <%= link_to "← Back to Dashboard", root_path, class: "bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200" %>
+    </div>
+  </div>
+
+  <%= form_with model: @dynamic_link, local: true, class: "space-y-8" do |form| %>
+    <% if @dynamic_link.errors.any? %>
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex">
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+            <div class="mt-2 text-sm text-red-700">
+              <ul class="list-disc pl-5 space-y-1">
+                <% @dynamic_link.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Basic Information -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="bg-blue-50 px-6 py-4 border-b border-blue-200">
+        <h2 class="text-lg font-semibold text-blue-900">📝 Basic Information</h2>
+        <p class="text-sm text-blue-700">Essential details for your dynamic link</p>
+      </div>
+      
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <%= form.label :title, class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.text_field :title, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "My Awesome App" %>
+          </div>
+          
+          <div>
+            <%= form.label :short_code, "Custom Short Code (optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.text_field :short_code, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "my-app (leave blank for auto-generated)" %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :target_url, "Target URL", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.url_field :target_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "https://example.com/landing-page" %>
+          <p class="mt-1 text-sm text-gray-500">The fallback URL where users will be redirected</p>
+        </div>
+
+        <div>
+          <%= form.label :description, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_area :description, rows: 3, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "Brief description of your link" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social Media Settings -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="bg-green-50 px-6 py-4 border-b border-green-200">
+        <h2 class="text-lg font-semibold text-green-900">🌟 Social Media Preview</h2>
+        <p class="text-sm text-green-700">How your link appears when shared on social platforms</p>
+      </div>
+      
+      <div class="p-6 space-y-6">
+        <div>
+          <%= form.label :social_title, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_field :social_title, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500", placeholder: "Compelling social media title" %>
+          <p class="mt-1 text-sm text-gray-500">Recommended: 60 characters or less</p>
+        </div>
+
+        <div>
+          <%= form.label :social_description, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_area :social_description, rows: 2, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500", placeholder: "Brief description for social media previews" %>
+          <p class="mt-1 text-sm text-gray-500">Recommended: 160 characters or less</p>
+        </div>
+
+        <div>
+          <%= form.label :social_image_url, "Social Image URL", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.url_field :social_image_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500", placeholder: "https://example.com/image.jpg" %>
+          <p class="mt-1 text-sm text-gray-500">Recommended: 1200x630px for best results</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- iOS Configuration -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="bg-blue-50 px-6 py-4 border-b border-blue-200">
+        <h2 class="text-lg font-semibold text-blue-900">📱 iOS Configuration</h2>
+        <p class="text-sm text-blue-700">Settings for iPhone and iPad users</p>
+      </div>
+      
+      <%= form.fields_for :ios_config_attributes, @dynamic_link.ios_config || @dynamic_link.build_ios_config do |ios_form| %>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <%= ios_form.label :bundle_identifier, "Bundle ID", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= ios_form.text_field :bundle_identifier, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "com.company.app" %>
+            </div>
+            
+            <div>
+              <%= ios_form.label :app_store_id, "App Store ID", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= ios_form.text_field :app_store_id, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "123456789" %>
+              <p class="mt-1 text-sm text-gray-500">Found in App Store Connect</p>
+            </div>
+          </div>
+
+          <div>
+            <%= ios_form.label :custom_scheme, "Custom URL Scheme", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= ios_form.text_field :custom_scheme, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "myapp" %>
+          </div>
+
+          <div>
+            <%= ios_form.label :app_store_url, "Custom App Store URL (optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= ios_form.url_field :app_store_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "https://apps.apple.com/app/my-app/id123456789" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Android Configuration -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="bg-green-50 px-6 py-4 border-b border-green-200">
+        <h2 class="text-lg font-semibold text-green-900">🤖 Android Configuration</h2>
+        <p class="text-sm text-green-700">Settings for Android users</p>
+      </div>
+      
+      <%= form.fields_for :android_config_attributes, @dynamic_link.android_config || @dynamic_link.build_android_config do |android_form| %>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <%= android_form.label :package_name, "Package Name", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= android_form.text_field :package_name, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500", placeholder: "com.company.app" %>
+            </div>
+            
+            <div>
+              <%= android_form.label :custom_scheme, "Custom URL Scheme", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= android_form.text_field :custom_scheme, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500", placeholder: "myapp" %>
+            </div>
+          </div>
+
+          <div>
+            <%= android_form.label :play_store_url, "Custom Play Store URL (optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= android_form.url_field :play_store_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500", placeholder: "https://play.google.com/store/apps/details?id=com.company.app" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Web Configuration -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="bg-purple-50 px-6 py-4 border-b border-purple-200">
+        <h2 class="text-lg font-semibold text-purple-900">💻 Web Configuration</h2>
+        <p class="text-sm text-purple-700">Settings for desktop and web users</p>
+      </div>
+      
+      <%= form.fields_for :web_config_attributes, @dynamic_link.web_config || @dynamic_link.build_web_config do |web_form| %>
+        <div class="p-6 space-y-6">
+          <div>
+            <%= web_form.label :desktop_url, "Desktop URL (optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= web_form.url_field :desktop_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500", placeholder: "https://myapp.com/desktop" %>
+            <p class="mt-1 text-sm text-gray-500">Specific URL for desktop users</p>
+          </div>
+
+          <div>
+            <%= web_form.label :fallback_url, "Web Fallback URL (optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= web_form.url_field :fallback_url, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500", placeholder: "https://myapp.com" %>
+            <p class="mt-1 text-sm text-gray-500">Alternative web destination</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Settings -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-900">⚙️ Settings</h2>
+        <p class="text-sm text-gray-700">Link behavior and tracking options</p>
+      </div>
+      
+      <div class="p-6 space-y-6">
+        <div class="flex items-center space-x-3">
+          <%= form.check_box :active, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+          <%= form.label :active, "Active", class: "text-sm font-medium text-gray-700" %>
+          <span class="text-sm text-gray-500">- Link will be accessible immediately</span>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <%= form.check_box :analytics_enabled, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+          <%= form.label :analytics_enabled, "Enable Analytics", class: "text-sm font-medium text-gray-700" %>
+          <span class="text-sm text-gray-500">- Track clicks and user behavior</span>
+        </div>
+
+        <div>
+          <%= form.label :created_by, "Created By (optional)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_field :created_by, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "Your name or team" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto-Parameters Configuration -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-900">🎯 Auto-Parameters</h2>
+        <p class="text-sm text-gray-700">Automatically add tracking parameters to URLs</p>
+      </div>
+      
+      <div class="p-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <%= form.check_box :enable_utm_tracking, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+            <%= form.label :enable_utm_tracking, "Enable UTM Tracking", class: "text-sm font-medium text-gray-700 ml-2" %>
+            <p class="text-xs text-gray-500 mt-1">Adds utm_source, utm_medium, utm_campaign, utm_content</p>
+          </div>
+          
+          <div>
+            <%= form.check_box :enable_device_params, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+            <%= form.label :enable_device_params, "Enable Device Parameters", class: "text-sm font-medium text-gray-700 ml-2" %>
+            <p class="text-xs text-gray-500 mt-1">Adds dl_device, dl_timestamp, dl_id</p>
+          </div>
+        </div>
+        
+        <div>
+          <%= form.label :auto_params, "Custom Parameters (JSON)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_area :auto_params, rows: 3, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", 
+                           placeholder: '{"custom_param": "value", "campaign_id": "summer2024"}',
+                           value: (@dynamic_link.auto_params&.to_json || '{}') %>
+          <p class="mt-1 text-sm text-gray-500">Additional custom parameters to append automatically</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center justify-between bg-gray-50 px-6 py-4 rounded-lg">
+      <div class="flex space-x-3">
+        <%= form.submit "🚀 Create Dynamic Link", class: "bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500" %>
+        <%= link_to "Cancel", root_path, class: "bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200" %>
+      </div>
+      
+      <div class="text-sm text-gray-500">
+        ✨ Your link will be available immediately after creation
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<script>
+// Auto-generate short code from title
+document.addEventListener('DOMContentLoaded', function() {
+  const titleField = document.getElementById('dynamic_link_title');
+  const shortCodeField = document.getElementById('dynamic_link_short_code');
+  
+  if (titleField && shortCodeField) {
+    titleField.addEventListener('input', function() {
+      if (shortCodeField.value === '') {
+        const slug = this.value
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .substring(0, 20);
+        shortCodeField.placeholder = slug + ' (auto-suggested)';
+      }
+    });
+  }
+});
+</script>

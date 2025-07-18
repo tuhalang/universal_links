@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= @redirect_options[:link].title %> | Smart Link</title>
+  
+  <!-- Social Media Meta Tags -->
+  <meta property="og:title" content="<%= @redirect_options[:link].social_title.presence || @redirect_options[:link].title %>">
+  <meta property="og:description" content="<%= @redirect_options[:link].social_description.presence || @redirect_options[:link].description %>">
+  <% if @redirect_options[:link].social_image_url.present? %>
+    <meta property="og:image" content="<%= @redirect_options[:link].social_image_url %>">
+  <% end %>
+  <meta property="og:url" content="<%= @redirect_options[:link].short_url %>">
+  <meta property="og:type" content="website">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= @redirect_options[:link].social_title.presence || @redirect_options[:link].title %>">
+  <meta name="twitter:description" content="<%= @redirect_options[:link].social_description.presence || @redirect_options[:link].description %>">
+  <% if @redirect_options[:link].social_image_url.present? %>
+    <meta name="twitter:image" content="<%= @redirect_options[:link].social_image_url %>">
+  <% end %>
+  
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      max-width: 400px;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      margin: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-decoration: none;
+      border-radius: 25px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><%= @redirect_options[:link].title %></h1>
+    <div class="spinner" id="spinner"></div>
+    <p id="status">Opening app...</p>
+    
+    <div id="fallback-options" class="hidden">
+      <p>Having trouble? Try these options:</p>
+      <% if @redirect_options[:fallback_url] %>
+        <a href="<%= @redirect_options[:fallback_url] %>" class="btn">Download App</a>
+      <% end %>
+      <a href="<%= @redirect_options[:link].target_url %>" class="btn">Continue in Browser</a>
+    </div>
+  </div>
+
+  <script>
+    const options = <%= raw @redirect_options.to_json %>;
+    
+    // Track page visibility to detect if app opened
+    let appOpened = false;
+    let timeoutId;
+    
+    // Function to show fallback options
+    function showFallback() {
+      if (!appOpened) {
+        document.getElementById('spinner').classList.add('hidden');
+        document.getElementById('status').textContent = 'App not installed?';
+        document.getElementById('fallback-options').classList.remove('hidden');
+      }
+    }
+    
+    // Function to attempt deep link
+    function attemptDeepLink() {
+      const platform = options.platform;
+      
+      if (platform === 'ios') {
+        attemptIOSDeepLink();
+      } else if (platform === 'android') {
+        attemptAndroidDeepLink();
+      } else {
+        // Fallback for unknown platforms
+        window.location.href = options.link.target_url;
+      }
+    }
+    
+    function attemptIOSDeepLink() {
+      // Try Universal Link first
+      if (options.primary_url) {
+        // Create invisible iframe to attempt Universal Link
+        const iframe = document.createElement('iframe');
+        iframe.style.visibility = 'hidden';
+        iframe.style.width = '1px';
+        iframe.style.height = '1px';
+        iframe.src = options.primary_url;
+        document.body.appendChild(iframe);
+        
+        // If Universal Link fails, try custom scheme
+        setTimeout(() => {
+          if (!appOpened && options.custom_scheme_url) {
+            window.location.href = options.custom_scheme_url;
+          }
+        }, 500);
+      } else if (options.custom_scheme_url) {
+        window.location.href = options.custom_scheme_url;
+      }
+      
+      // Set timeout for fallback
+      timeoutId = setTimeout(showFallback, options.timeout);
+    }
+    
+    function attemptAndroidDeepLink() {
+      // Try Intent URL first (Chrome for Android)
+      if (options.intent_url && navigator.userAgent.includes('Chrome')) {
+        window.location.href = options.intent_url;
+      } else if (options.primary_url) {
+        // Try App Link
+        window.location.href = options.primary_url;
+      } else if (options.custom_scheme_url) {
+        // Fallback to custom scheme
+        window.location.href = options.custom_scheme_url;
+      }
+      
+      // Set timeout for fallback
+      timeoutId = setTimeout(showFallback, options.timeout);
+    }
+    
+    // Detect if user navigated away (app opened)
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        appOpened = true;
+        clearTimeout(timeoutId);
+      }
+    });
+    
+    // Detect page focus change (another way to detect app opening)
+    window.addEventListener('blur', function() {
+      appOpened = true;
+      clearTimeout(timeoutId);
+    });
+    
+    // Start the deep link attempt
+    setTimeout(attemptDeepLink, 100);
+    
+    // Emergency fallback in case everything fails
+    setTimeout(() => {
+      if (!appOpened) {
+        window.location.href = options.fallback_url || options.link.target_url;
+      }
+    }, options.timeout + 2000);
+  </script>
+</body>
+</html> 

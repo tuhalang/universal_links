@@ -1,0 +1,380 @@
+<% content_for :title, "Analytics - #{@dynamic_link.title}" %>
+
+<div class="max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">📊 Analytics Dashboard</h1>
+        <p class="mt-2 text-gray-600">
+          Detailed performance metrics for "<%= @dynamic_link.title %>"
+        </p>
+      </div>
+      
+      <div class="flex space-x-3">
+        <%= link_to @dynamic_link, class: "bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700" do %>
+          ← Back to Link
+        <% end %>
+        <%= link_to root_path, class: "bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200" do %>
+          Dashboard
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md text-white p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm">Total Clicks</p>
+          <p class="text-3xl font-bold"><%= number_with_delimiter(@dynamic_link.total_clicks) %></p>
+        </div>
+        <div class="text-3xl">🎯</div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md text-white p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-green-100 text-sm">Last 30 Days</p>
+          <p class="text-3xl font-bold"><%= number_with_delimiter(@clicks_by_day.values.sum) %></p>
+        </div>
+        <div class="text-3xl">📈</div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-md text-white p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-purple-100 text-sm">Unique Platforms</p>
+          <p class="text-3xl font-bold"><%= @clicks_by_platform.keys.count %></p>
+        </div>
+        <div class="text-3xl">📱</div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-md text-white p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-orange-100 text-sm">Active Since</p>
+          <p class="text-2xl font-bold"><%= @dynamic_link.created_at.strftime("%b %d") %></p>
+        </div>
+        <div class="text-3xl">📅</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Clicks Over Time Chart -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">📈 Clicks Over Time (30 Days)</h2>
+      <% if @clicks_by_day.any? %>
+        <div class="relative h-80">
+          <canvas id="clicksOverTimeChart"></canvas>
+        </div>
+      <% else %>
+        <div class="flex items-center justify-center h-64 text-gray-500">
+          <div class="text-center">
+            <div class="text-4xl mb-2">📊</div>
+            <p>No data yet - share your link to see analytics!</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Platform Breakdown -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">📱 Platform Distribution</h2>
+      <% if @clicks_by_platform.any? %>
+        <div class="relative h-80">
+          <canvas id="platformDistributionChart"></canvas>
+        </div>
+      <% else %>
+        <div class="flex items-center justify-center h-64 text-gray-500">
+          <div class="text-center">
+            <div class="text-4xl mb-2">📱</div>
+            <p>No platform data available</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Browser Breakdown -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">🌐 Browser Distribution</h2>
+      <% if @clicks_by_browser.any? %>
+        <div class="space-y-3">
+          <% @clicks_by_browser.each do |browser, count| %>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-4 h-4 bg-blue-500 rounded-full"></div>
+                <span class="font-medium text-gray-700"><%= browser || "Unknown" %></span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <span class="text-gray-900 font-semibold"><%= number_with_delimiter(count) %></span>
+                <div class="w-20 bg-gray-200 rounded-full h-2">
+                  <div class="bg-blue-500 h-2 rounded-full" 
+                       style="width: <%= (count.to_f / @dynamic_link.total_clicks * 100).round(1) %>%"></div>
+                </div>
+                <span class="text-sm text-gray-500 w-12"><%= (count.to_f / @dynamic_link.total_clicks * 100).round(1) %>%</span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="flex items-center justify-center h-40 text-gray-500">
+          <div class="text-center">
+            <div class="text-3xl mb-2">🌐</div>
+            <p>No browser data available</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Operating System -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">💻 Operating Systems</h2>
+      <% if @clicks_by_os.any? %>
+        <div class="space-y-3">
+          <% @clicks_by_os.each do |os, count| %>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="text-lg">
+                  <% if os&.downcase == 'ios' %>📱
+                  <% elsif os&.downcase == 'android' %>🤖
+                  <% elsif os&.downcase&.include?('windows') %>🪟
+                  <% elsif os&.downcase&.include?('mac') %>🍎
+                  <% elsif os&.downcase&.include?('linux') %>🐧
+                  <% else %>💻
+                  <% end %>
+                </div>
+                <span class="font-medium text-gray-700"><%= os || "Unknown" %></span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <span class="text-gray-900 font-semibold"><%= number_with_delimiter(count) %></span>
+                <div class="w-20 bg-gray-200 rounded-full h-2">
+                  <div class="bg-green-500 h-2 rounded-full" 
+                       style="width: <%= (count.to_f / @dynamic_link.total_clicks * 100).round(1) %>%"></div>
+                </div>
+                <span class="text-sm text-gray-500 w-12"><%= (count.to_f / @dynamic_link.total_clicks * 100).round(1) %>%</span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="flex items-center justify-center h-40 text-gray-500">
+          <div class="text-center">
+            <div class="text-3xl mb-2">💻</div>
+            <p>No OS data available</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Geographic Data -->
+  <% if @clicks_by_country.any? %>
+    <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">🌍 Geographic Distribution</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <% @clicks_by_country.each do |country, count| %>
+          <div class="text-center p-3 bg-gray-50 rounded-lg">
+            <div class="text-2xl mb-1">🌍</div>
+            <div class="font-semibold text-gray-900"><%= country %></div>
+            <div class="text-sm text-gray-500"><%= number_with_delimiter(count) %> clicks</div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Recent Activity -->
+  <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">🕐 Recent Activity (Last 50 Clicks)</h2>
+    <% if @recent_clicks.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Device</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OS</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Browser</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @recent_clicks.each do |click| %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div class="flex items-center space-x-2">
+                    <span>
+                      <% if click.device_type == 'smartphone' %>📱
+                      <% elsif click.device_type == 'tablet' %>📋
+                      <% else %>💻
+                      <% end %>
+                    </span>
+                    <span><%= click.device_type&.titleize || "Unknown" %></span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= click.os_name || "Unknown" %>
+                  <% if click.os_version.present? %>
+                    <span class="text-gray-500">(<%= click.os_version %>)</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= click.browser_name || "Unknown" %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= click.country || "Unknown" %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= time_ago_in_words(click.clicked_at) %> ago
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <div class="text-6xl mb-4">📊</div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">No activity yet</h3>
+        <p class="text-gray-600 mb-6">
+          Share your dynamic link to start collecting analytics data
+        </p>
+        <div class="flex items-center justify-center space-x-2 bg-blue-50 rounded-lg px-4 py-3 max-w-md mx-auto">
+          <code class="text-blue-800 font-mono"><%= @dynamic_link.short_url %></code>
+          <button onclick="copyToClipboard('<%= @dynamic_link.short_url %>', this)" 
+                  class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            📋 Copy
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+function copyToClipboard(text, button) {
+  navigator.clipboard.writeText(text).then(function() {
+    const originalText = button.textContent;
+    button.textContent = '✅ Copied!';
+    button.classList.add('text-green-600');
+    
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.classList.remove('text-green-600');
+    }, 2000);
+  });
+}
+
+// Wait for Chart.js to load
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait a bit for Chart.js to fully load
+  setTimeout(function() {
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+      console.error('Chart.js not loaded');
+      return;
+    }
+    
+    console.log('Chart.js loaded successfully, version:', Chart.version);
+
+  <% if @clicks_by_day.any? %>
+  // Clicks Over Time Chart
+  const clicksData = <%= raw @clicks_by_day.to_json %>;
+  const clicksLabels = Object.keys(clicksData);
+  const clicksValues = Object.values(clicksData);
+  
+  const clicksCtx = document.getElementById('clicksOverTimeChart');
+  if (clicksCtx) {
+    new Chart(clicksCtx, {
+      type: 'line',
+      data: {
+        labels: clicksLabels,
+        datasets: [{
+          label: 'Clicks',
+          data: clicksValues,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          pointBackgroundColor: '#3b82f6',
+          pointBorderColor: '#1d4ed8',
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: true,
+              color: '#f3f4f6'
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: true,
+              color: '#f3f4f6'
+            },
+            ticks: {
+              stepSize: 1,
+              maxTicksLimit: 8
+            }
+          }
+        }
+      }
+    });
+  }
+  <% end %>
+
+  <% if @clicks_by_platform.any? %>
+  // Platform Distribution Chart
+  const platformData = <%= raw @clicks_by_platform.to_json %>;
+  const platformLabels = Object.keys(platformData);
+  const platformValues = Object.values(platformData);
+  
+  const platformCtx = document.getElementById('platformDistributionChart');
+  if (platformCtx) {
+    new Chart(platformCtx, {
+      type: 'doughnut',
+      data: {
+        labels: platformLabels,
+        datasets: [{
+          data: platformValues,
+          backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true
+            }
+          }
+        }
+      }
+    });
+  }
+  <% end %>
+  }, 100); // Wait 100ms for Chart.js to fully load
+});
+</script>
