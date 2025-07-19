@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_18_145621) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_19_141852) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -58,7 +58,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_145621) do
     t.text "auto_params"
     t.boolean "enable_utm_tracking"
     t.boolean "enable_device_params"
+    t.bigint "user_id"
     t.index ["short_code"], name: "index_dynamic_links_on_short_code", unique: true
+    t.index ["user_id"], name: "index_dynamic_links_on_user_id"
   end
 
   create_table "ios_configs", force: :cascade do |t|
@@ -73,6 +75,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_145621) do
     t.index ["dynamic_link_id"], name: "index_ios_configs_on_dynamic_link_id"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "email", null: false
+    t.string "password_digest", null: false
+    t.integer "role", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["role"], name: "index_users_on_role"
+  end
+
   create_table "web_configs", force: :cascade do |t|
     t.bigint "dynamic_link_id", null: false
     t.string "desktop_url"
@@ -84,6 +97,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_145621) do
 
   add_foreign_key "android_configs", "dynamic_links"
   add_foreign_key "clicks", "dynamic_links"
+  add_foreign_key "dynamic_links", "users"
   add_foreign_key "ios_configs", "dynamic_links"
   add_foreign_key "web_configs", "dynamic_links"
 end

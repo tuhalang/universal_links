@@ -41,7 +41,7 @@
   </head>
 
   <body class="bg-gray-50 min-h-screen">
-    <!-- Enhanced Navigation -->
+    <!-- Enhanced Navigation with Authentication -->
     <nav class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50 backdrop-blur-md bg-white/95">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -56,26 +56,81 @@
             <% end %>
           </div>
           
-          <div class="hidden md:flex items-center space-x-4">
-            <%= link_to "Dashboard", root_path, class: "text-gray-700 hover:text-emerald-600 px-3 py-2 text-sm font-medium transition-colors" %>
-            <%= link_to "Create Link", new_dynamic_link_path, class: "bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm" %>
+          <div class="flex items-center space-x-4">
+            <% if logged_in? %>
+              <!-- Authenticated Navigation -->
+              <div class="hidden md:flex items-center space-x-4">
+                <%= link_to "📊 Dashboard", root_path, 
+                    class: "px-3 py-2 text-sm font-medium transition-colors",
+                    style: "color: #374151 !important; text-decoration: none !important; border: 1px solid #D1D5DB !important; border-radius: 6px;" %>
+                <%= link_to "✨ Create Link", new_dynamic_link_path, 
+                    class: "px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm",
+                    style: "background-color: #10B981 !important; color: white !important; text-decoration: none !important; border: 2px solid #047857 !important;" %>
+              </div>
+              
+              <!-- User Menu -->
+              <div class="relative">
+                <div class="flex items-center space-x-3">
+                  <span class="text-sm" style="color: #374151 !important;">Hi, <strong><%= current_user.name %></strong></span>
+                  <% if current_user.admin? %>
+                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full"
+                          style="color: #6B46C1 !important; background-color: #EDE9FE !important; border: 1px solid #C4B5FD !important;">👑 Admin</span>
+                  <% end %>
+                  <%= link_to current_user, 
+                      class: "flex text-sm rounded-full focus:outline-none",
+                      style: "background-color: #1F2937 !important; text-decoration: none !important;" do %>
+                    <div style="width: 42px; height: 42px; background: linear-gradient(135deg, #10B981, #0D9488); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid white;">
+                      <span style="color: white; font-size: 18px; font-weight: bold;"><%= current_user.name.first.upcase %></span>
+                    </div>
+                  <% end %>
+                  <%= form_with url: logout_path, method: :delete, local: true, style: "display: inline; margin: 0;" do |form| %>
+                    <%= form.submit "🚪 Logout", 
+                        style: "color: #DC2626 !important; border: 1px solid #FCA5A5 !important; border-radius: 6px; background-color: #FEF2F2 !important; padding: 8px 12px; font-size: 14px; font-weight: 500; cursor: pointer;" %>
+                  <% end %>
+                </div>
+              </div>
+            <% else %>
+              <!-- Guest Navigation -->
+              <div class="flex items-center space-x-4">
+                <%= link_to "🔑 Login", login_path, 
+                    class: "px-3 py-2 text-sm font-medium transition-colors",
+                    style: "color: #374151 !important; text-decoration: none !important; border: 1px solid #D1D5DB !important; border-radius: 6px;" %>
+                <%= link_to "✨ Sign Up", register_path, 
+                    class: "px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm",
+                    style: "background-color: #10B981 !important; color: white !important; text-decoration: none !important; border: 2px solid #047857 !important;" %>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>
     </nav>
 
+    <!-- Flash Messages -->
+    <% if flash.any? %>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <% flash.each do |type, message| %>
+          <% css_class = type == 'notice' ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200' %>
+          <div class="<%= css_class %> border px-4 py-3 rounded-md mb-4">
+            <%= message %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="<%= logged_in? ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8' : '' %>">
       <%= yield %>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="text-center text-gray-600">
-          <p class="text-sm">© 2024 Universal Links. Smart URL redirection for modern applications.</p>
+    <% if logged_in? %>
+      <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div class="text-center text-gray-600">
+            <p class="text-sm">© 2024 Universal Links. Smart URL redirection for modern applications.</p>
+          </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+    <% end %>
   </body>
 </html>

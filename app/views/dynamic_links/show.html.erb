@@ -249,17 +249,19 @@
       </div>
 
       <!-- Actions -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h3 class="font-semibold text-gray-900 mb-3">🔧 Quick Actions</h3>
-        <div class="space-y-2">
-          <%= link_to toggle_active_dynamic_link_path(@dynamic_link), method: :patch, 
-                      class: "block w-full text-center px-4 py-2 #{ @dynamic_link.active? ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : 'bg-green-100 text-green-700 hover:bg-green-200' } rounded-lg font-medium" do %>
-            <%= @dynamic_link.active? ? '⏸️ Deactivate' : '▶️ Activate' %>
+      <div style="background-color: white; border-radius: 10px; padding: 25px; border: 1px solid #E5E7EB;">
+        <h3 style="font-weight: bold; color: #111827; margin: 0 0 15px 0; font-size: 18px;">🔧 Quick Actions</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <%= form_with url: toggle_active_dynamic_link_path(@dynamic_link), method: :patch, local: true, style: "margin: 0;" do |form| %>
+            <%= form.submit (@dynamic_link.active? ? '⏸️ Deactivate Link' : '▶️ Activate Link'), 
+                style: "width: 100%; text-align: center; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; #{@dynamic_link.active? ? 'background-color: #FED7AA; color: #EA580C;' : 'background-color: #D1FAE5; color: #059669;'}" %>
           <% end %>
           
-          <%= link_to "🗑️ Delete", dynamic_link_path(@dynamic_link), method: :delete,
-                      confirm: "Are you sure? This action cannot be undone.",
-                      class: "block w-full text-center px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg font-medium" %>
+          <%= form_with url: dynamic_link_path(@dynamic_link), method: :delete, local: true, 
+              data: { confirm: "Are you sure? This action cannot be undone." }, style: "margin: 0;" do |form| %>
+            <%= form.submit "🗑️ Delete Link", 
+                style: "width: 100%; text-align: center; padding: 12px; background-color: #FEE2E2; color: #DC2626; border-radius: 8px; font-weight: 600; cursor: pointer; border: none;" %>
+          <% end %>
         </div>
       </div>
     </div>

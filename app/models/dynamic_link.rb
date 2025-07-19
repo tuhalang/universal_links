@@ -1,5 +1,6 @@
 class DynamicLink < ApplicationRecord
   # Associations
+  belongs_to :user
   has_one :ios_config, dependent: :destroy
   has_one :android_config, dependent: :destroy
   has_one :web_config, dependent: :destroy
@@ -23,6 +24,7 @@ class DynamicLink < ApplicationRecord
   # Scopes
   scope :active, -> { where(active: true) }
   scope :recent, -> { order(created_at: :desc) }
+  scope :for_user, ->(user) { where(user: user) }
 
   # Callbacks
   before_validation :generate_short_code, on: :create

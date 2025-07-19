@@ -67,11 +67,28 @@ rails db:create db:migrate db:seed
 rails server
 ```
 
+### **Demo Account**
+A demo user account is automatically created during database setup:
+
+```
+Email: demo@utilsawesome.com
+Password: admin123
+Role: User (not admin)
+```
+
+**Features Available:**
+- ✅ Create and manage your own dynamic links
+- ✅ View detailed analytics for your links
+- ✅ Edit and customize link configurations
+- ✅ Access all user-level features
+- ❌ No admin privileges (cannot see other users' links)
+
 ### **First Link**
 1. Open http://localhost:3000
-2. Click "Create New Link"
-3. Configure your target URL and platform settings
-4. Share your smart link and watch the analytics!
+2. Login with demo credentials or register a new account
+3. Click "Create New Link"
+4. Configure your target URL and platform settings
+5. Share your smart link and watch the analytics!
 
 ## 📚 Documentation
 

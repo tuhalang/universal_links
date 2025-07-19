@@ -1,4 +1,6 @@
 class LinksController < ApplicationController
+  # Skip CSRF verification for API-like usage (smart links don't need forms)
+  skip_before_action :verify_authenticity_token, only: [ :redirect ]
   before_action :find_dynamic_link, only: [ :redirect ]
 
   def redirect

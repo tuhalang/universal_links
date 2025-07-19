@@ -1,12 +1,23 @@
 class DynamicLinksController < ApplicationController
+  before_action :require_login
   before_action :set_dynamic_link, only: [ :show, :edit, :update, :destroy, :analytics, :toggle_active ]
+  before_action :authorize_link_access, only: [ :show, :edit, :update, :destroy, :analytics, :toggle_active ]
   before_action :parse_auto_params, only: [ :create, :update ]
 
   def index
-    @dynamic_links = DynamicLink.recent.includes(:ios_config, :android_config, :web_config)
-    @total_links = @dynamic_links.count
-    @total_clicks = Click.count
-    @links_today = @dynamic_links.joins(:clicks).where(clicks: { clicked_at: Date.current.beginning_of_day..Date.current.end_of_day }).distinct.count
+    if current_user.admin?
+      # Admin can see all links
+      @dynamic_links = DynamicLink.recent.includes(:user, :ios_config, :android_config, :web_config)
+      @total_links = DynamicLink.count
+      @total_clicks = Click.count
+      @links_today = DynamicLink.joins(:clicks).where(clicks: { clicked_at: Date.current.beginning_of_day..Date.current.end_of_day }).distinct.count
+    else
+      # Regular users see only their links
+      @dynamic_links = current_user.dynamic_links.recent.includes(:ios_config, :android_config, :web_config)
+      @total_links = @dynamic_links.count
+      @total_clicks = current_user.dynamic_links.joins(:clicks).count
+      @links_today = current_user.dynamic_links.joins(:clicks).where(clicks: { clicked_at: Date.current.beginning_of_day..Date.current.end_of_day }).distinct.count
+    end
   end
 
   def show
@@ -16,14 +27,14 @@ class DynamicLinksController < ApplicationController
   end
 
   def new
-    @dynamic_link = DynamicLink.new
+    @dynamic_link = current_user.dynamic_links.build
     @dynamic_link.build_ios_config
     @dynamic_link.build_android_config
     @dynamic_link.build_web_config
   end
 
   def create
-    @dynamic_link = DynamicLink.new(dynamic_link_params)
+    @dynamic_link = current_user.dynamic_links.build(dynamic_link_params)
 
     if @dynamic_link.save
       redirect_to @dynamic_link, notice: "Dynamic link was successfully created."
@@ -71,7 +82,15 @@ class DynamicLinksController < ApplicationController
   private
 
   def set_dynamic_link
-    @dynamic_link = DynamicLink.find(params[:id])
+    if current_user.admin?
+      @dynamic_link = DynamicLink.find(params[:id])
+    else
+      @dynamic_link = current_user.dynamic_links.find(params[:id])
+    end
+  end
+
+  def authorize_link_access
+    authorize_user_or_admin(@dynamic_link)
   end
 
   def parse_auto_params
