@@ -25,6 +25,6 @@ module UniversalLinks
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Dynamic Links configuration
-    config.app_domain = ENV.fetch("APP_DOMAIN") { "192.168.1.8:3000" }
+    config.app_domain = ENV.fetch("APP_DOMAIN") { "utilsawesome.com" }
   end
 end

@@ -46,6 +46,9 @@ Rails.application.configure do
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
+  # Configure allowed hosts for production with utilsawesome.com as default
+  config.hosts = ENV.fetch("ALLOWED_HOSTS", "utilsawesome.com,www.utilsawesome.com,localhost,127.0.0.1").split(",").map(&:strip)
+
   # Replace the default in-process memory cache store with a durable alternative.
   # config.cache_store = :mem_cache_store
 
