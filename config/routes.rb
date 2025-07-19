@@ -11,6 +11,17 @@ Rails.application.routes.draw do
 
 
 
+  # Static file routes (must come before short code route to prevent conflicts)
+  get "favicon.ico", to: redirect("/favicon.svg", status: 301)
+  get "robots.txt", to: proc { [ 200, { "Content-Type" => "text/plain" }, [ "User-agent: *\nDisallow:" ] ] }
+  get "apple-touch-icon.png", to: proc { [ 204, {}, [] ] }
+  get "apple-touch-icon-precomposed.png", to: proc { [ 204, {}, [] ] }
+  get "sitemap.xml", to: proc { [ 404, {}, [] ] }
+
+  # Open Graph and social media preview routes
+  get "og-image.png", to: proc { [ 204, {}, [] ] }
+  get "twitter-image.png", to: proc { [ 204, {}, [] ] }
+
   # Smart redirect endpoint - this handles the actual link redirects
   # Must be last to catch all remaining routes
   get ":short_code", to: "links#redirect", constraints: { short_code: /[a-zA-Z0-9_-]+/ }
