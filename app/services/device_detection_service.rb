@@ -34,15 +34,43 @@ class DeviceDetectionService
   end
 
   def os_version
-    detector.os_full_version || detector.os_version || "Unknown"
+    # Use the correct DeviceDetector API
+    version = nil
+    begin
+      # Try different methods based on DeviceDetector version
+      version = detector.os_full_version if detector.respond_to?(:os_full_version)
+      version ||= detector.os_version if detector.respond_to?(:os_version)
+      version ||= detector.os.full_version if detector.respond_to?(:os) && detector.os.respond_to?(:full_version)
+      version ||= detector.os.version if detector.respond_to?(:os) && detector.os.respond_to?(:version)
+    rescue => e
+      Rails.logger.warn "DeviceDetector os_version error: #{e.message}"
+    end
+    version || "Unknown"
   end
 
   def browser_name
-    detector.name
+    begin
+      # Try different methods for browser name
+      name = detector.name if detector.respond_to?(:name)
+      name ||= detector.client.name if detector.respond_to?(:client) && detector.client.respond_to?(:name)
+    rescue => e
+      Rails.logger.warn "DeviceDetector browser_name error: #{e.message}"
+      name = nil
+    end
+    name || "Unknown"
   end
 
   def browser_version
-    detector.full_version || "Unknown"
+    begin
+      # Try different methods for browser version
+      version = detector.full_version if detector.respond_to?(:full_version)
+      version ||= detector.client.full_version if detector.respond_to?(:client) && detector.client.respond_to?(:full_version)
+      version ||= detector.client.version if detector.respond_to?(:client) && detector.client.respond_to?(:version)
+    rescue => e
+      Rails.logger.warn "DeviceDetector browser_version error: #{e.message}"
+      version = nil
+    end
+    version || "Unknown"
   end
 
   def mobile?
