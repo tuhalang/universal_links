@@ -27,8 +27,17 @@ Rails.application.configure do
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
 
-  # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  # Let nginx handle SSL termination instead of Rails
+  config.force_ssl = false
+
+  # Trust nginx proxy headers for proper URL generation
+  config.action_dispatch.trusted_proxies = [
+    "127.0.0.1",      # localhost
+    "::1",            # IPv6 localhost
+    "10.0.0.0/8",     # Private network ranges
+    "172.16.0.0/12",
+    "192.168.0.0/16"
+  ]
 
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
