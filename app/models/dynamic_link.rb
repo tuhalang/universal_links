@@ -33,7 +33,13 @@ class DynamicLink < ApplicationRecord
     domain = Rails.application.config.app_domain ||
              Rails.application.config.action_mailer.default_url_options[:host] ||
              "localhost:3000"
-    "#{domain.start_with?('http') ? domain : "http://#{domain}"}/#{short_code}"
+
+    # Always use HTTPS for security
+    if domain.start_with?("http")
+      "#{domain}/#{short_code}"
+    else
+      "https://#{domain}/#{short_code}"
+    end
   end
 
   def target_url_with_params(device_type: nil, source: nil, campaign: nil, additional_params: {})
